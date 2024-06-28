@@ -14,12 +14,19 @@
     <div id="editor_contentwrapper">
         <h1 style="text-align: center; font-size: 45px;font-family: 'Rockin Rocker', sans-serif;">Puzzle Game</h1>
         <div id="editor_editor">
-            <div id="editor_canvas">
-                <canvas id="canvas"></canvas>
+            <div id="editor_image" style="display: flex;">
+                <div id="menu">
+                    <button id="playNumber" class="button" onclick="playNumber()" style="text-align: center; margin: 10px;">Number</button>
+                    <button id="playImage" class="button" onclick="playImage()" style="text-align: center; margin: 10px">Image</button>
+                </div>
+                <img id="img" style="width: 200px; height: 200px; margin-left: 1%; margin-top: 20px;"/>
+                <div id="editor_canvas">
+                    <canvas id="canvas"></canvas>
+                </div>
             </div>
             <p id="timer">Time: 00:00:00</p>
             <div id="divButton">
-                <button id="reset" onclick="reset()" style="text-align: center;">Reset</button>
+                <button id="reset" class="button" onclick="reset()" style="text-align: center;">Reset</button>
             </div>
         </div>
     </div>

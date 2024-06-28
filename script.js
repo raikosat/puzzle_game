@@ -9,12 +9,16 @@ const backgroundPosX = 0;
 const backgroundPosY = 0;
 let offsetX = 0;
 let offsetY = 0;
+let isPlayNumber = true;
 
 function setting() {
     canvas.width = backgroundWidth + distance;
     canvas.height = backgroundHeight + distance;
 }
 setting();
+
+let image = new Image();
+image.src = './img/pic2.jpg';
 
 class Background {
     constructor(backgroundPosX, backgroundPosY, backgroundWidth, backgroundHeight) {
@@ -32,8 +36,8 @@ class Background {
     draw() {
         const distance = 2;
         // FILL RECTANGLE
-        ctx.fillStyle = "#8FBC8F";
-        ctx.fillRect(this.posX, this.posY, this.width + distance, this.height + distance);
+        // ctx.fillStyle = "#8FBC8F";
+        // ctx.fillRect(this.posX, this.posY, this.width + distance, this.height + distance);
 
         // debug
         ctx.strokeStyle = "blue";
@@ -90,28 +94,56 @@ class Block {
 }
 
 class Puzzle {
-    constructor(posX, posY, index, text) {
+    constructor(posX, posY, index, text, frameX, frameY) {
         this.posX = posX;
         this.posY = posY;
         this.width = 100;
         this.height = 100;
         this.index = index;
         this.text = text;
+        this.frameX = frameX;
+        this.frameY = frameY;
+        this.cropWidth = 100;
+        this.cropHeight = 100;
     }
 
     draw() {
         const distance = 2;
-        ctx.fillStyle = "#DEB887";
-        ctx.fillRect(this.posX + distance, this.posY + distance, this.width - distance, this.height - distance);
-
-        ctx.fillStyle = "#aa0000";
-        ctx.font = "bold 38px Oswald";
-        let textPosX = this.posX + (this.width/2);
-        let textPosY = this.posY + (this.height/2);
-        if (this.text > 9) {
-            ctx.fillText(this.text, textPosX - 20, textPosY + 10);
+        if (isPlayNumber) {
+            // number
+            ctx.fillStyle = "#DEB887";
+            ctx.fillRect(this.posX + distance, this.posY + distance, this.width - distance, this.height - distance);
+    
+            ctx.fillStyle = "#aa0000";
+            ctx.font = "bold 38px Oswald";
+            let textPosX = this.posX + (this.width/2);
+            let textPosY = this.posY + (this.height/2);
+            if (this.text > 9) {
+                ctx.fillText(this.text, textPosX - 20, textPosY + 10);
+            } else {
+                ctx.fillText(this.text, textPosX - 10, textPosY + 10);
+            }
         } else {
-            ctx.fillText(this.text, textPosX - 10, textPosY + 10);
+            // image
+            const crop = {
+                position: {
+                    x: this.cropWidth * this.frameX,
+                    y: this.cropHeight * this.frameY
+                },
+                width: this.cropWidth,
+                height: 100
+            }
+            ctx.drawImage(
+                image,
+                crop.position.x,
+                crop.position.y,
+                crop.width,
+                crop.height,
+                this.posX + distance,
+                this.posY + distance,
+                crop.width - distance,
+                crop.height - distance
+            );
         }
     }
 
@@ -144,7 +176,18 @@ function initGame() {
             }
             indexRandom[i] = random;
             let text = random + 1;
-            puzzle = new Puzzle(posX, posY, random, text);
+
+            let frameX = count;
+            let frameY = 0;
+            if (random > 3) {
+                frameX = random % totalblocksX;
+                frameY = random / totalblocksX;
+            }
+            if (isPlayNumber) {
+                puzzle = new Puzzle(posX, posY, random, text, count, row);
+            } else {
+                puzzle = new Puzzle(posX, posY, random, text, frameX, frameY);
+            }
             // let text = i+1;
             // puzzle = new Puzzle(posX, posY, i, text);
             puzzles[i] = puzzle;
@@ -259,6 +302,7 @@ function checkWin() {
 
 function reset() {
     // reset Game
+    resetImage();
     second = 0;
     minutes = 0;
     hours = 0;
@@ -270,6 +314,25 @@ function reset() {
     const timer = 'Time: ' + hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + second.toString().padStart(2, '0');
     document.getElementById('timer').textContent = timer;
     initGame();
+}
+
+function playNumber() {
+    isPlayNumber = true;
+    reset();
+}
+
+function playImage() {
+    isPlayNumber = false;
+    reset();
+}
+
+function resetImage() {
+    if (isPlayNumber) {
+        image.src = './img/pic2.jpg';
+    } else {
+        image.src = './img/pic1.jpg';
+    }
+    document.getElementById("img").src = image.src;;
 }
 
 function animate(timeStamp) {
@@ -289,6 +352,7 @@ function animate(timeStamp) {
 }
 
 window.onload = function() {
+    resetImage();
     const rect = document.getElementById("editor_canvas").getBoundingClientRect();
     offsetX = rect.left;
     offsetY = rect.top;

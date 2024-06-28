@@ -24,8 +24,8 @@ body {
 
 #editor_canvas {
     position: relative;
-    background-color: aqua;
-    margin: auto;
+    background-color: aquamarine;
+    margin-left: 3%;
     top: 20px;
     width: 402px;
     height: 402px;
@@ -41,10 +41,10 @@ body {
 
 #divButton {
     margin: auto;
-    width: 8%;
+    width: 13%;
 }
 
-#reset {
+.button {
     background-color: #008CBA;
     border: none;
     color: white;
@@ -54,6 +54,14 @@ body {
     display: inline-block;
     font-size: 16px;
     border-radius: 12px;
+    width: 180px;
 }
 
-#reset:hover {background-color: #3e8e41}
+.button:hover {background-color: #3e8e41}
+
+#menu {
+    margin-top: 20px;
+    width: 210px;
+    height: 300px;
+    background-color: peru;
+}
