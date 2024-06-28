@@ -1,51 +1,80 @@
+// setting
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-canvas.width = 400;
-canvas.height = 400;
-gameWidth = 400;
-gameHeight = 400;
-blockWidth = 100;
-blockHeight = 100;
-totalPuzzles = 15;
-maxPuzzle = 4;
-isWin = false;
-time = 0;
+const ctx2 = canvas.getContext('2d');
+const distance = 2;
+const backgroundWidth = 400;
+const backgroundHeight = 400;
+const backgroundPosX = 0;
+const backgroundPosY = 0;
+let offsetX = 0;
+let offsetY = 0;
+
+function setting() {
+    canvas.width = backgroundWidth + distance;
+    canvas.height = backgroundHeight + distance;
+}
+setting();
 
 class Background {
-    constructor(gameWidth, gameHeight) {
-        this.gameWidth = gameWidth;
-        this.gameHeight = gameHeight;
-        this.centerX = gameWidth/2 - 200;
-        this.centerY = gameHeight/2 - 200;
+    constructor(backgroundPosX, backgroundPosY, backgroundWidth, backgroundHeight) {
+        this.width = backgroundWidth;
+        this.height = backgroundHeight;
+        this.posX = backgroundPosX;
+        this.posY = backgroundPosY;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.posXWithOffset = 0;
+        this.posYWithOffset = 0;
+        // console.log(this.posX + ',' + this.posY);
     }
 
     draw() {
+        const distance = 2;
         // FILL RECTANGLE
-        ctx.fillStyle = "#ffd700";
-        ctx.fillRect(this.centerX, this.centerY, this.gameWidth, this.gameHeight);
+        ctx.fillStyle = "#8FBC8F";
+        ctx.fillRect(this.posX, this.posY, this.width + distance, this.height + distance);
+
+        // debug
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(this.posX, this.posY, this.width + distance, this.height + distance);
+
+        // const text = this.posX + ", " + this.posY + ", " + this.offsetX + ", " + this.offsetY;
+        // ctx.fillStyle = "#000000";
+        // ctx.font = "20px Georgia";
+        // ctx.fillText(text, this.posX + 2, this.posY + 13);
     }
 
     update() {
-
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.posXWithOffset = this.posX + this.offsetX;
+        this.posYWithOffset = this.posY + this.offsetY;
     }
 }
-
-const background = new Background(gameWidth, gameHeight);
+const background = new Background(backgroundPosX, backgroundPosY, backgroundWidth, backgroundHeight);
 
 class Block {
-    constructor(posX, posY, index) {
+    constructor(posX, posY, index, offsetX, offsetY, row, column) {
         this.posX = posX;
         this.posY = posY;
-        this.blockWidth = 100;
-        this.blockHeight = 100;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.posXWithOffset = posX + offsetX;
+        this.posYWithOffset = posY + offsetY;
+        this.width = 100;
+        this.height = 100;
         this.index = index;
+        this.row = row;
+        this.column = column;
         this.puzzle = null;
     }
 
     draw() {
-        // let distant = 2;
-        // ctx.fillStyle = "#0000ff";
-        // ctx.fillRect(this.posX + distant, this.posY + distant, this.blockWidth - (distant*2), this.blockHeight - (distant*2));
+        // const distance = 2;
+        // ctx.fillStyle = "#DEB887";
+        // ctx.fillRect(this.posX + distance, this.posY + distance, this.width - distance, this.height - distance);
         if (this.puzzle != null) {
             this.puzzle.draw();
         }
@@ -55,6 +84,8 @@ class Block {
         if (this.puzzle != null) {
             this.puzzle.update();
         }
+        this.posXWithOffset = this.posX + this.offsetX;
+        this.posYWithOffset = this.posY + this.offsetY;
     }
 }
 
@@ -69,18 +100,14 @@ class Puzzle {
     }
 
     draw() {
-        let distant = 2;
-        let posXCurrent = this.posX + distant;
-        let posYCurrent = this.posY + distant;
-        let widthCurrent = this.width - (distant*2);
-        let heightCurrent = this.height - (distant*2);
-        ctx.fillStyle = "#008000";
-        ctx.fillRect(posXCurrent, posYCurrent, widthCurrent, heightCurrent);
+        const distance = 2;
+        ctx.fillStyle = "#DEB887";
+        ctx.fillRect(this.posX + distance, this.posY + distance, this.width - distance, this.height - distance);
 
         ctx.fillStyle = "#aa0000";
-        ctx.font = "38px Arial";
-        let textPosX = posXCurrent + (widthCurrent/2);
-        let textPosY = posYCurrent + (heightCurrent/2);
+        ctx.font = "bold 38px Oswald";
+        let textPosX = this.posX + (this.width/2);
+        let textPosY = this.posY + (this.height/2);
         if (this.text > 9) {
             ctx.fillText(this.text, textPosX - 20, textPosY + 10);
         } else {
@@ -93,71 +120,122 @@ class Puzzle {
     }
 }
 
+// run
+let start = false;
+let isWin = false;
 let blocks = [];
 let puzzles = [];
-function begin() {
+totalblocksX = backgroundWidth/100;
+totalblocksY = backgroundHeight/100;
+totalblocks = totalblocksX * totalblocksY;
+function initGame() {
     let indexRandom = [];
-    let posX = background.centerX;
-    let posY = background.centerY;
-    for (i = 0; i <= totalPuzzles; i++) {
-        let block = new Block(posX, posY, i);
+    let posX = background.posX;
+    let posY = background.posY;
+    let count = 0;
+    let row = 0;
+    for (i = 0; i < totalblocks; i++) {
+        let block = new Block(posX, posY, i, background.posXWithOffset, background.posYWithOffset, row, count);
         let puzzle = null;
-        if (i < totalPuzzles) {
-            let random = Math.floor(Math.random() * totalPuzzles);
+        if (i < totalblocks - 1) {
+            let random = Math.floor(Math.random() * totalblocks);
             while (indexRandom.includes(random)) {
-                random = Math.floor(Math.random() * totalPuzzles);
+                random = Math.floor(Math.random() * totalblocks);
             }
             indexRandom[i] = random;
             let text = random + 1;
             puzzle = new Puzzle(posX, posY, random, text);
+            // let text = i+1;
+            // puzzle = new Puzzle(posX, posY, i, text);
             puzzles[i] = puzzle;
         }
-
         block.puzzle = puzzle;
+
         blocks[i] = block;
-        posX += block.blockWidth;
-        if (posX >= (background.centerX+background.gameWidth)) {
-            posY += block.blockHeight;
-            posX = background.centerX;
+        posX += block.width;
+        if (count === (totalblocksX - 1)) {
+            posY += block.height;
+            posX = backgroundPosX;
+            count = 0;
+            row++;
+        } else {
+            count++;
         }
     }
+    // console.log(blocks);
 }
-begin();
+
+function setBackGroundOffset(offsetX, offsetY) {
+    background.offsetX = offsetX;
+    background.offsetY = offsetY;
+    background.update();
+}
+
+let hours = 0;
+let minutes = 0;
+let second = 0;
+let time;
+function timeSlap() {
+    time = setInterval(function updateDateTime() {
+        second++;
+        if (second === 60) {
+            second = 0;
+            minutes++;
+        }
+        if(minutes === 60) {
+            minutes = 0;
+            hours++;
+        }
+        const timer = 'Time: ' + hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + second.toString().padStart(2, '0');
+        document.getElementById('timer').textContent = timer;
+    }, 1000);
+}
 
 window.addEventListener('click', function (e) {
     // console.log(e.x, e.y);
+    if (isWin) {
+        return;
+    }
     let flag = false;
     [...blocks].forEach(block => {
-        if (e.x >= block.posX && e.x <= (block.posX + block.blockWidth) && e.y >= block.posY && e.y <= (block.posY + block.blockHeight)) {
+        if (e.x >= block.posXWithOffset && e.x <= (block.posXWithOffset + block.width) && e.y >= block.posYWithOffset && e.y <= (block.posYWithOffset + block.height)) {
             if (block.puzzle != null && flag === false) {
-                if(block.index - 1 >= 0 && blocks[block.index - 1].puzzle === null) {
+                if (start === false) {
+                    start = true;
+                    timeSlap();
+                }
+                if(block.column > 0 && blocks[block.index - 1].puzzle === null) { // left block
                     block.puzzle.posX = blocks[block.index - 1].posX;
                     block.puzzle.posY = blocks[block.index - 1].posY;
                     blocks[block.index - 1].puzzle = block.puzzle;
                     block.puzzle = null;
                     flag = true;
                     // console.log(blocks[block.index - 1]);
-                } else if (block.index + 1 <= totalPuzzles && blocks[block.index + 1].puzzle === null) {
+                } else if (block.column < totalblocksX - 1 && blocks[block.index + 1].puzzle === null) { // right block
                     block.puzzle.posX = blocks[block.index + 1].posX;
                     block.puzzle.posY = blocks[block.index + 1].posY;
                     blocks[block.index + 1].puzzle = block.puzzle;
                     block.puzzle = null;
                     flag = true;
                     // console.log(blocks[block.index + 1]);
-                } else if (block.index - maxPuzzle >= 0 && blocks[block.index - maxPuzzle].puzzle === null) {
-                    block.puzzle.posX = blocks[block.index - maxPuzzle].posX;
-                    block.puzzle.posY = blocks[block.index - maxPuzzle].posY;
-                    blocks[block.index - maxPuzzle].puzzle = block.puzzle;
+                } else if (block.row > 0 && blocks[block.index - totalblocksX].puzzle === null) { // up block
+                    block.puzzle.posX = blocks[block.index - totalblocksX].posX;
+                    block.puzzle.posY = blocks[block.index - totalblocksX].posY;
+                    blocks[block.index - totalblocksX].puzzle = block.puzzle;
                     block.puzzle = null;
                     flag = true;
                     // console.log(blocks[block.index - maxPuzzle]);
-                } else if (block.index + maxPuzzle <= totalPuzzles && blocks[block.index + maxPuzzle].puzzle === null) {
-                    block.puzzle.posX = blocks[block.index + maxPuzzle].posX;
-                    block.puzzle.posY = blocks[block.index + maxPuzzle].posY;
-                    blocks[block.index + maxPuzzle].puzzle = block.puzzle;
+                } else if (block.row < totalblocksY - 1 && blocks[block.index + totalblocksX].puzzle === null) { // down block
+                    block.puzzle.posX = blocks[block.index + totalblocksX].posX;
+                    block.puzzle.posY = blocks[block.index + totalblocksX].posY;
+                    blocks[block.index + totalblocksX].puzzle = block.puzzle;
                     block.puzzle = null;
                     flag = true;
                     // console.log(blocks[block.index + maxPuzzle]);
+                }
+                if (checkWin()) {
+                    isWin = true;
+                    clearInterval(time);
                 }
             }
             // console.log(block);
@@ -166,25 +244,56 @@ window.addEventListener('click', function (e) {
     // console.log(flag);
 });
 
-function animate(timeStamp) {
-    if (isWin) {
-        return;
+function checkWin() {
+    let count = 0;
+    [...blocks].forEach(block => {
+        if (block.puzzle !== null && block.index === block.puzzle.index) {
+            count++;
+        }
+    });
+    if (count === blocks.length - 1) {
+        return true;
     }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return false;
+}
+
+function reset() {
+    // reset Game
+    second = 0;
+    minutes = 0;
+    hours = 0;
+    isWin = false;
+    start = false;
+    blocks = [];
+    puzzles = [];
+    clearInterval(time);
+    const timer = 'Time: ' + hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + second.toString().padStart(2, '0');
+    document.getElementById('timer').textContent = timer;
+    initGame();
+}
+
+function animate(timeStamp) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // canvas clear
     background.draw();
     background.update();
     [...blocks].forEach(block => block.draw());
     [...blocks].forEach(block => block.update());
-    requestAnimationFrame(animate);
-    let count = 0;
-    [...blocks].forEach(block => {
-        if (block.puzzle != null && block.index === block.puzzle.index) {
-            count++;
-        }
-    });
-    if (count === totalPuzzles) {
-        isWin = true;
+    const id = requestAnimationFrame(animate);
+    if (isWin) {
+        const text = "Congratulation!!!";
+        ctx2.fillStyle = "#008080";
+        ctx2.font = "bold 38px Georgia";
+        ctx2.fillText(text, (background.posX + background.width)/10, (background.posY + background.height)/2);
+        cancelAnimationFrame(id);
     }
 }
 
-animate(0);
+window.onload = function() {
+    const rect = document.getElementById("editor_canvas").getBoundingClientRect();
+    offsetX = rect.left;
+    offsetY = rect.top;
+    // console.log("offsetX:" + offsetX + " - offsetY: " + offsetY);
+    setBackGroundOffset(offsetX, offsetY);
+    initGame();
+    animate(0);
+};

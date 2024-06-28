@@ -7,14 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puzzle Game</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.cdnfonts.com/css/rockin-rocker" rel="stylesheet">
 </head>
 
 <body>
-    <h1 style="text-align: center; font-size: 45px;">Puzzle Game</h1>
-    <div class="center" style="width: 400px; height: 400px;">
-        <canvas id="canvas"></canvas>
+    <div id="editor_contentwrapper">
+        <h1 style="text-align: center; font-size: 45px;font-family: 'Rockin Rocker', sans-serif;">Puzzle Game</h1>
+        <div id="editor_editor">
+            <div id="editor_canvas">
+                <canvas id="canvas"></canvas>
+            </div>
+            <p id="timer">Time: 00:00:00</p>
+            <div id="divButton">
+                <button id="reset" onclick="reset()" style="text-align: center;">Reset</button>
+            </div>
+        </div>
     </div>
-    <p style="text-align: center; font-size: 45px;">Time: 0</p>
 
     <script src="script.js"></script>
 </body>
