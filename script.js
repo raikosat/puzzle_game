@@ -181,12 +181,13 @@ function initGame() {
             let frameY = 0;
             if (random > 3) {
                 frameX = random % totalblocksX;
-                frameY = random / totalblocksX;
+                frameY = Math.floor(random / totalblocksX);
             }
             if (isPlayNumber) {
                 puzzle = new Puzzle(posX, posY, random, text, count, row);
             } else {
                 puzzle = new Puzzle(posX, posY, random, text, frameX, frameY);
+                // puzzle = new Puzzle(posX, posY, random, text, count, row);
             }
             // let text = i+1;
             // puzzle = new Puzzle(posX, posY, i, text);
