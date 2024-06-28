@@ -170,9 +170,9 @@ function initGame() {
         let block = new Block(posX, posY, i, background.posXWithOffset, background.posYWithOffset, row, count);
         let puzzle = null;
         if (i < totalblocks - 1) {
-            let random = Math.floor(Math.random() * totalblocks);
+            let random = Math.floor(Math.random() * (totalblocks - 1));
             while (indexRandom.includes(random)) {
-                random = Math.floor(Math.random() * totalblocks);
+                random = Math.floor(Math.random() * (totalblocks - 1));
             }
             indexRandom[i] = random;
             let text = random + 1;
